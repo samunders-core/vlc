@@ -842,9 +842,20 @@ namespace
             if ( !title )
                 return false;
             const char *psz_subtitles = xml_getChildElementValue( itemElement, "sec:CaptionInfo" );
-            if ( !psz_subtitles &&
-                 !(psz_subtitles = xml_getChildElementValue( itemElement, "sec:CaptionInfoEx" )) )
-                psz_subtitles = xml_getChildElementValue( itemElement, "pv:subtitlefile" );
+            addSlave(psz_subtitles, SLAVE_TYPE_SPU);
+            int list_length = 0;
+            IXML_NodeList* p_subtitle_list = ixmlDocument_getElementsByTagName(
+                            (IXML_Document*) itemElement, "sec:CaptionInfoEx" );
+            if (p_subtitle_list)
+                list_length = ixmlNodeList_length( p_subtitle_list );
+            for (int index = 0; index < list_length; index++)
+            {
+                IXML_Node* p_childNode = ixmlNodeList_item( p_subtitle_list, index );
+                psz_subtitles = ixmlNode_getNodeValue( p_childNode );
+                addSlave(psz_subtitles, SLAVE_TYPE_SPU);
+            }
+            ixmlNodeList_free( p_subtitle_list );
+            psz_subtitles = xml_getChildElementValue( itemElement, "pv:subtitlefile" );
             addSlave(psz_subtitles, SLAVE_TYPE_SPU);
             psz_artist = xml_getChildElementValue( itemElement, "upnp:artist" );
             psz_genre = xml_getChildElementValue( itemElement, "upnp:genre" );
